@@ -1,0 +1,109 @@
+> library(ggplot2)
+> library(cluster)
+> data=jumlah_penduduk
+> data
+# A tibble: 18 x 4
+   DESA        LAKI PEREMPUAN JUMLAH
+   <chr>      <dbl>     <dbl>  <dbl>
+ 1 Pandansari  2050      2002   4052
+ 2 Kaliwareng   998      1009   2007
+ 3 Pejambon     905       880   1785
+ 4 Sariglagah   638       538   1176
+ 5 Pesaren     1739      1752   3491
+ 6 Sidorejo    2433      2426   4859
+ 7 Cepagan     1821      1724   3545
+ 8 Masin       1843      1806   3649
+ 9 Banjiran    1358      1261   2619
+10 Warungasem   917       952   1869
+11 Gapuro      1404      1429   2833
+12 Kalibeluk   2531      2620   5151
+13 Sawahjoho   1679      1621   3300
+14 Candiareng  1825      1678   3503
+15 Lebo        2053      1994   4047
+16 Menguneng   1765      1651   3416
+17 Terban      1376      1285   2661
+18 Sijono       706       662   1368
+> data$DESA
+ [1] "Pandansari" "Kaliwareng" "Pejambon"   "Sariglagah" "Pesaren"    "Sidorejo"  
+ [7] "Cepagan"    "Masin"      "Banjiran"   "Warungasem" "Gapuro"     "Kalibeluk" 
+[13] "Sawahjoho"  "Candiareng" "Lebo"       "Menguneng"  "Terban"     "Sijono"    
+> hasil<-kmeans(data[,2,3],3)
+> hasil
+K-means clustering with 3 clusters of sizes 5, 4, 9
+
+Cluster means:
+      [,1]
+1  832.800
+2 2266.750
+3 1645.556
+
+Clustering vector:
+ [1] 2 1 1 1 3 2 3 3 3 1 3 2 3 3 2 3 3 1
+
+Within cluster sum of squares by cluster:
+[1]  93618.8 190136.8 339780.2
+ (between_SS / total_SS =  88.3 %)
+
+Available components:
+
+[1] "cluster"      "centers"      "totss"        "withinss"     "tot.withinss"
+[6] "betweenss"    "size"         "iter"         "ifault"      
+> hasil$cluster
+ [1] 2 1 1 1 3 2 3 3 3 1 3 2 3 3 2 3 3 1
+> hasil$centers
+      [,1]
+1  832.800
+2 2266.750
+3 1645.556
+> hasil$size
+[1] 5 4 9
+> table(hasil$cluster, data$DESA)
+   
+    Banjiran Candiareng Cepagan Gapuro Kalibeluk Kaliwareng Lebo Masin Menguneng
+  1        0          0       0      0         0          1    0     0         0
+  2        0          0       0      0         1          0    1     0         0
+  3        1          1       1      1         0          0    0     1         1
+   
+    Pandansari Pejambon Pesaren Sariglagah Sawahjoho Sidorejo Sijono Terban
+  1          0        1       0          1         0        0      1      0
+  2          1        0       0          0         0        1      0      0
+  3          0        0       1          0         1        0      0      1
+   
+    Warungasem
+  1          1
+  2          0
+  3          0
+> hasil$cluster <- as.factor(hasil$cluster)
+> ggplot(data, aes(data$DESA, data$LAKI, data$PEREMPUAN, color = hasil$cluster)) + geom_point()
+> dataSample <-data[,2,3]
+> hc <- hclust(dist(dataSample), method="ave")
+> hc
+
+Call:
+hclust(d = dist(dataSample), method = "ave")
+
+Cluster method   : average 
+Distance         : euclidean 
+Number of objects: 18 
+
+> plot(hc, hang = -1, labels=data$2016)
+Error: unexpected numeric constant in "plot(hc, hang = -1, labels=data$2016"
+> plot(hc, hang = -1, labels=data$PEREMPUAN)
+> d <- dist(dataSample, method="euclidian")
+> pamCluster <- pam(d, 3)
+> clusplot(as.matrix(d), pamCluster$cluster, color=T, shade=T, labels=3, lines=0)
+> pamCluster
+Medoids:
+     ID   
+[1,] 16 16
+[2,]  3  3
+[3,] 12 12
+Clustering vector:
+ [1] 1 2 2 2 1 3 1 1 1 2 1 3 1 1 1 1 1 2
+Objective function:
+   build     swap 
+161.7222 150.2778 
+
+Available components:
+[1] "medoids"    "id.med"     "clustering" "objective"  "isolation"  "clusinfo"  
+[7] "silinfo"    "diss"       "call"
